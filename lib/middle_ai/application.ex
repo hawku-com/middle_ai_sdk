@@ -16,7 +16,7 @@ defmodule MiddleAi.Application do
     endpoint = Application.get_env(:middle_ai, :endpoint, "http://localhost:4318")
     api_key = Application.get_env(:middle_ai, :api_key, "")
 
-    resource = :otel_resource.create([{"provider", "middle_ai"}])
+    resource = :otel_resource.create([])
 
     :otel_tracer_provider_sup.start(
       :middle_ai_provider,

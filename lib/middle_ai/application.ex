@@ -4,7 +4,9 @@ defmodule MiddleAi.Application do
   use Application
 
   def start(_type, _args) do
-    setup_opentelemetry()
+    if Application.get_env(:middle_ai, :enabled, true) do
+      setup_opentelemetry()
+    end
 
     opts = [strategy: :one_for_one, name: MiddleAi.Supervisor]
     Supervisor.start_link([], opts)

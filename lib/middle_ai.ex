@@ -27,9 +27,28 @@ defmodule MiddleAi do
     Span.end_span(trace)
   end
 
-  defp parse_model_params(model_params) do
-    Enum.into(model_params, %{}, fn {key, value} ->
-      {"model_param:#{key}", value}
+  def parse_model_params(model_params) do
+    Enum.reduce(model_params, %{}, fn {key, value}, acc ->
+      key
+      |> extract_keys_leaf_value(value)
+      |> Enum.into(acc, fn {keys, value} ->
+        {"model_param." <> keys, value}
+      end)
     end)
+  end
+
+  defp extract_keys_leaf_value(key, value) when is_map(value) do
+    Enum.map(value, fn {k, v} ->
+      k
+      |> extract_keys_leaf_value(v)
+      |> Enum.map(fn {keys, value} ->
+        {"#{key}.#{keys}", value}
+      end)
+    end)
+    |> List.flatten()
+  end
+
+  defp extract_keys_leaf_value(key, value) do
+    [{key, value}]
   end
 end

@@ -32,7 +32,7 @@ defmodule MiddleAi do
       key
       |> extract_keys_leaf_value(value)
       |> Enum.into(acc, fn {keys, value} ->
-        {"model_param." <> keys, value}
+        {"model_param.#{keys}", value}
       end)
     end)
   end

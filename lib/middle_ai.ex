@@ -1,14 +1,19 @@
 defmodule MiddleAi do
   alias OpenTelemetry.Span
 
-  @spec start_trace(String.t(), String.t(), map(), String.t(), String.t()) ::
+  @spec start_trace(String.t(), String.t(), map(), String.t(), String.t(), String.t()) ::
           OpenTelemetry.span_ctx()
-  def start_trace(name, model, model_params, user, prompt) do
+  def start_trace(name, model, model_params, user, prompt, thread_id \\ "") do
     model_params = parse_model_params(model_params)
 
     attributes =
       Map.merge(
-        %{"llm_model" => model, "enduser_id" => user, "user_prompt" => prompt},
+        %{
+          "llm_model" => model,
+          "enduser_id" => user,
+          "user_prompt" => prompt,
+          "thread_id" => thread_id
+        },
         model_params
       )
 

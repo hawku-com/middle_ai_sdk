@@ -5,7 +5,12 @@ defmodule MiddleAi do
           OpenTelemetry.span_ctx()
   def start_trace(name, model, model_params, user, prompt) do
     model_params = parse_model_params(model_params)
-    attributes = Map.merge(%{"model" => model, "user" => user, "prompt" => prompt}, model_params)
+
+    attributes =
+      Map.merge(
+        %{"llm_model" => model, "enduser_id" => user, "user_prompt" => prompt},
+        model_params
+      )
 
     :middle_ai_provider
     |> :otel_tracer_provider.get_tracer(:middle_ai, "", "")
@@ -23,11 +28,11 @@ defmodule MiddleAi do
   end
 
   def end_trace(trace, output) do
-    Span.set_attribute(trace, :output, output)
+    Span.set_attribute(trace, "llm_output", output)
     Span.end_span(trace)
   end
 
-  def parse_model_params(model_params) do
+  defp parse_model_params(model_params) do
     Enum.reduce(model_params, %{}, fn {key, value}, acc ->
       key
       |> extract_keys_leaf_value(value)

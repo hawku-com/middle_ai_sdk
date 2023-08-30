@@ -13,10 +13,10 @@ defmodule MiddleAi.Application do
   end
 
   defp setup_opentelemetry do
-    endpoint = Application.get_env(:middle_ai, :endpoint, "http://localhost:4318")
+    endpoint = Application.get_env(:middle_ai, :endpoint, "http://localhost:4001")
     api_key = Application.get_env(:middle_ai, :api_key, "")
 
-    resource = :otel_resource.create([])
+    resource = :otel_resource_detector.get_resource()
 
     :otel_tracer_provider_sup.start(
       :middle_ai_provider,

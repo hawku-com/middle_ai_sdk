@@ -5,9 +5,17 @@ defmodule MiddleAi.Tracer do
 
       @tracer_ref Keyword.fetch!(opts, :tracer_ref)
 
-      @spec start_trace(String.t(), String.t(), map(), String.t(), String.t(), String.t()) ::
+      @spec start_trace(
+              String.t(),
+              String.t(),
+              map(),
+              String.t(),
+              String.t(),
+              String.t(),
+              String.t()
+            ) ::
               OpenTelemetry.span_ctx()
-      def start_trace(name, model, model_params, user, prompt, thread_id \\ "") do
+      def start_trace(name, model, model_params, user, prompt, thread_id, initial_prompt \\ "") do
         model_params = parse_model_params(model_params)
 
         attributes =
@@ -17,6 +25,7 @@ defmodule MiddleAi.Tracer do
               "enduser_id" => user,
               "user_prompt" => prompt,
               "thread_id" => thread_id,
+              "initial_prompt" => initial_prompt,
               "application_ref" => @tracer_ref
             },
             model_params

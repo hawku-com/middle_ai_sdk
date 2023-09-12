@@ -3,6 +3,8 @@ defmodule MiddleAi.Tracer do
     quote bind_quoted: [opts: opts] do
       alias OpenTelemetry.Span
 
+      @type feedback_type() :: :emoji | :thumbs | :scale
+
       @tracer_ref Keyword.fetch!(opts, :tracer_ref)
 
       @spec start_trace(String.t(), String.t(), map(), String.t(), String.t(), String.t()) ::
@@ -42,6 +44,30 @@ defmodule MiddleAi.Tracer do
         Span.end_span(trace)
       end
 
+      @spec send_feedback(String.t(), String.t(), feedback_type(), String.t()) ::
+              {:ok, any()} | {:error, any()}
+      def send_feedback(thread_id, user, type, feedback) do
+        endpoint = Application.get_env(:middle_ai, :endpoint, "http://localhost:4001")
+        api_key = Application.get_env(:middle_ai, :api_key, "")
+
+        url = to_charlist(endpoint <> "/v1/traces/feedback")
+        headers = [{~c"x-middle-ai-api-key", to_charlist(api_key)}]
+        content_type = ~c"application/json"
+
+        body =
+          %{
+            thread_id: thread_id,
+            application_ref: @tracer_ref,
+            enduser_id: cast_to_string(user),
+            feedback_type: type,
+            feedback_value: feedback
+          }
+          |> Jason.encode!()
+          |> to_charlist()
+
+        :httpc.request(:post, {url, headers, content_type, body}, [], [])
+      end
+
       defp parse_model_params(model_params) do
         Enum.reduce(model_params, %{}, fn {key, value}, acc ->
           key
@@ -66,6 +92,9 @@ defmodule MiddleAi.Tracer do
       defp extract_keys_leaf_value(key, value) do
         [{key, value}]
       end
+
+      defp cast_to_string(value) when is_binary(value), do: value
+      defp cast_to_string(value), do: to_string(value)
     end
   end
 end

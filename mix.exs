@@ -27,6 +27,7 @@ defmodule MiddleAi.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:jason, "~> 1.4"},
       {:opentelemetry, "~> 1.3"},
       {:opentelemetry_api, "~> 1.2"},
       {:opentelemetry_exporter, "~> 1.6"}
